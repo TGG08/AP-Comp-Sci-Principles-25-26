@@ -22,3 +22,14 @@ let numberOfFish = 1
 let numberOfSnakes = 1
 let totalNumberOfAnimals = numberOfDogs + numberOfCats + numberOfTurtles + numberOfHamsters + numberOfPotBelliedPig + numberOfFish + numberOfSnakes
 let totalNumberOfMammals = numberOfDogs + numberOfCats + numberOfHamsters + numberOfPotBelliedPig
+
+//PAGE 10 "putting on a show"
+let totaLTicketValue = 1500
+let totalExpenses = 1040
+let totalIncome = 460
+
+//PAGE 11 "exercise lottery"
+let ticketsSold = 1000
+let ticketPrice = 3
+let printingCosts = 30
+let advertising = 100
