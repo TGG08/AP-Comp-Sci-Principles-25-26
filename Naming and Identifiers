@@ -33,3 +33,40 @@ let ticketsSold = 1000
 let ticketPrice = 3
 let printingCosts = 30
 let advertising = 100
+
+// PAGE 12 'what fits on your phone" 
+ let iPhonestorage = 8000
+let GB = 1000
+let previousstorage = 3000
+let oneminofvideo = 150
+let iphonecapacity = iPhonestorage - previousstorage
+let GBofcapcity = iphonecapacity / GB * 1000
+
+let newstoragecapacity = iphonecapacity / oneminofvideo
+// 33 minutes of video
+
+// PAGE 13 "fixing your morning" 
+let brushteeth = 3
+let wakeup = 5
+let eatingfood = 10
+let gettingdressed = 2
+let fixlunch = 5
+let packingstuff = 5
+
+let morningdutiestime = brushteeth + eatingfood + gettingdressed + fixlunch + packingstuff + wakeup
+
+let havetodo = brushteeth + wakeup + packingstuff + gettingdressed
+let liketodo = eatingfood + fixlunch
+let havetoandliketo = havetodo + liketodo
+
+// PAGE 14 "good names" 
+let orangecost = 14
+let watermeloncost = 3
+let orangeweight = 100
+let watermelonweight = 200
+let totalorange = orangecost * orangeweight
+let totalwatermelon = watermeloncost * watermelonweight
+let totaltotal = totalorange + totalwatermelon
+let eachside = totaltotal / 2
+let lefthalf = eachside / orangeweight
+let righthalf = orangecost - lefthalf
