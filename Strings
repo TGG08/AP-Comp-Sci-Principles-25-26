@@ -1,0 +1,19 @@
+// PAGE 3 "defining strings" 
+// Declare a favoriteMovie constant
+let favoritemovie = "The Departed"
+// Declare a favoriteSong constant
+let favortsong = "Black Star by Radiohead"
+//PAGE 5 "the console"
+print("testing")
+print("fourtyone")
+print("sixtyseven")
+
+// PAGE 6 "combining strings" 
+// Declare a firstName constant
+let firstname = "Troy"
+// Declare a lastName constant
+let lastname = "Galindo"
+// Combine the strings into a fullName constant
+let fullname = firstname + " " + lastname
+// Combine your full name with likesYourPostMessage
+let finishedmessage  = fullname + " " + likesYourPostMessage 
