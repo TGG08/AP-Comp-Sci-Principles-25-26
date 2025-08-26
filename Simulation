@@ -1,0 +1,19 @@
+// PAGE 3 "basic parameters" 
+numberOfAnts = 250
+antSpeed = 200
+// PAGE 4 "pheromnones" 
+environmentCellSize = 20
+numberOfAnts = 200
+pheromoneEvaporationRate = 500
+pheromoneDepositRate = 500
+// PAGE 5 "foraging" 
+homePheromoneDepositRate = 200
+foodPheromoneDepositRate = 200
+homePheromoneEvaporationRate = 100
+foodPheromoneEvaporationRate = 100
+
+environmentCellSize = 20
+numberOfAnts = 20
+
+numberOfAnts = 40
+antSpeed = 300
