@@ -17,3 +17,38 @@ let lastname = "Galindo"
 let fullname = firstname + " " + lastname
 // Combine your full name with likesYourPostMessage
 let finishedmessage  = fullname + " " + likesYourPostMessage 
+
+//PAGE 8 "string interpolation" 
+// Change this to your favorite food
+let favoriteFood = "chicken parmesean"
+
+// Change this to why you like it
+let reason = "delicious"
+
+// Define a string below in the pattern "I like ___ because it is ___."
+let foodlove = " I like \(favoriteFood), because it is \(reason)"
+
+// PAGE 10 "more than strings" 
+let pitcher = "Ben"
+let innings = 6
+let strikeouts = 7
+let walks = 2
+let runs = 2
+let earnedruns = 1
+let pitches = 97
+let pitcheouting = "\(pitcher) started the game yesterday and had \(innings) IP and had \(strikeouts) K's & \(walks) BB's. He only gave up \(runs) runs, but only allowed \(earnedruns) ER and it took him \(pitches) pitches."
+
+//PAGE 14 "making a list" 
+let interpolation = "fill in blanks"
+let constants = "values that will aways remain the same "
+let combining = "combine strings using +"
+let thingsleaerned = "Ive learned how to \(interpolation), that \(constants), and I can \(combining)"
+
+// PAGE 15 "a restaurant" 
+let serverResponseToTableTwo = "Let me make sure I've got this right: \(customerOrderFour), \(customerOrderFive), \(customerOrderSix). Is that correct?"
+
+// PAGE 16 "schol fight song" 
+let schoolName = "Hustlers"
+let refrain = "hmm hmm HMMM hm-hmm \(schoolName) hmm hmm HMMMMM, \(schoolName) here we go here we go"
+let refraintwo = "GOOOOOO \(schoolName)"
+let song = "\(refrain)\n\(refrain)\nYes, \(refraintwo)"
