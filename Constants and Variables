@@ -1,0 +1,7 @@
+// PAGE 1 "constant and variable" 
+let placeofbirth = "California"
+let livesin = "Yucaipa"
+let age = "17"
+let favoritemovie = "The Departed"
+let inchesinafoot = 12
+let firstpresident = "George Washignton" 
