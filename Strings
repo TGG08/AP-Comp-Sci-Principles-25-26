@@ -52,3 +52,20 @@ let schoolName = "Hustlers"
 let refrain = "hmm hmm HMMM hm-hmm \(schoolName) hmm hmm HMMMMM, \(schoolName) here we go here we go"
 let refraintwo = "GOOOOOO \(schoolName)"
 let song = "\(refrain)\n\(refrain)\nYes, \(refraintwo)"
+
+// PAGE 17 "displaying values" 
+let iPhonestorage = 8000
+let GB = 1000
+let previousstorage = 3000
+let oneminofvideo = 150
+let iphonecapacity = iPhonestorage - previousstorage
+let GBofcapcity = iphonecapacity / GB * 1000
+
+let newstoragecapacity = iphonecapacity / oneminofvideo
+// 33 minutes of video
+let howmanymoreminsofvideo = " You can record \(newstoragecapacity) more minutes of video"
+
+// PAGE 18 "what can you print?" 
+authorName
+print ("\(authorName)")
+print ("Did you know that \(bookTitle) was written by \(authorName)?")
