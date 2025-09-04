@@ -1,7 +1,101 @@
-// PAGE 1 "constant and variable" 
+// PAGE 2 "constant and variable" 
 let placeofbirth = "California"
 let livesin = "Yucaipa"
 let age = "17"
 let favoritemovie = "The Departed"
 let inchesinafoot = 12
 let firstpresident = "George Washignton" 
+
+// PAGE 3 "declaring variables" 
+var currentLocation = "California"
+currentLocation = "Aquinas"
+// PAGE 5 "a shortcut" 
+let word1 = "Compound"
+let word2 = "assignment"
+let word3 = "is"
+let word4 = "useful"
+let space = " "
+
+var statement = ""
+statement += word1
+statement += space
+statement += word2
+statement += space
+statement += word3
+statement += space
+statement += word4
+//PAGE 9 "safer code" 
+let friendBeverageChoice = "coffee"
+
+driveAcrossTown()
+buyACoffeeMaker()
+
+findCoffeeGrinder()
+
+
+
+findCoffeeBeans()
+driveHome()
+setUpCoffeeGrinder()
+
+grindBeans()
+makeFriendDrinkCoffee()
+
+//PAGE "safer code" 
+// Scores for each target
+let scoreForGreen = 5
+let scoreForRed = 10
+let scoreForGold = 20
+
+// Player scores
+var scoreForGary = 0
+var scoreForRob = 0
+
+// Game events here
+scoreForGary += scoreForRed
+scoreForGary += scoreForGreen
+scoreForGary += scoreForGold
+
+scoreForRob += scoreForRed
+scoreForRob += scoreForGreen
+scoreForRob += scoreForGold
+
+scoreForGary += scoreForRed
+scoreForGary += scoreForGreen
+scoreForGary += scoreForGold
+
+scoreForRob += scoreForRed
+scoreForRob += scoreForGreen
+scoreForRob += scoreForGold
+
+scoreForRob
+scoreForGary
+// PAGE 12 "making a shopping list" 
+let eggs = "Eggs"
+let milk = "Milk"
+let cheese = "Cheese"
+let bread = "Bread"
+let rice = "Rice"
+let newLine = "\n"
+var shoppinglist = ""
+shoppinglist = eggs + newLine
+shoppinglist = shoppinglist + milk + newLine
+shoppinglist = shoppinglist + cheese + newLine
+shoppinglist = shoppinglist + bread + newLine
+shoppinglist = shoppinglist + rice + newLine
+
+// PAGE 13 "501" 
+var overallscore = 501
+var roundscore = 0
+//round 1
+roundscore = 3 + 2 + 4
+overallscore -= roundscore
+print ("Opponent: You're not the best at this are you?")
+// round 2
+roundscore = 5 + 6 + 4
+overallscore -= roundscore
+print ("Opponent : Okay, now that's a little better")
+//round 3
+roundscore = 20 + 30 + 50
+overallscore -= roundscore
+print ("Opponent : Wait... what the heck just happened!")
