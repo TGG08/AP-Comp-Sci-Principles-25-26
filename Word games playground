@@ -1,0 +1,32 @@
+
+// Baseball Mad Lib
+
+let adjective1 = readLine()!
+let pluralNoun1 =  readLine()!
+let adjective2 =  readLine()!
+let pluralNoun2 =  readLine()!
+let position =  readLine()!
+let verb1 =  readLine()!
+let number =  readLine()!
+let adjective3 =  readLine()!
+let noun1 =  readLine()!
+let adverb =  readLine()!
+let pluralNoun3 =  readLine()!
+let verb2 =  readLine()!
+let running =  readLine()!
+let base =  readLine()!
+let exclamation =  readLine()!
+let adjective4 =  readLine()!
+
+let story = """
+Yesterday, my team, the \(adjective1) \(pluralNoun1), had a huge game against the \(adjective2) \(pluralNoun2).
+I was playing \(position) when the crowd started to \(verb1) loudly.
+In the bottom of the \(number) inning, with two outs, I came up to bat.
+The pitcher threw a \(adjective3) \(noun1) right down the middle.
+I swung the bat and hit the ball so \(adverb) that it flew off the \(pluralNoun3).
+Everyone started to \(verb2) and I ran around the bases while \(running). 
+When I slid into \(base), the umpire shouted, "\(exclamation)".
+It was the most \(adjective4) moment of my baseball career!
+"""
+
+print(story)
