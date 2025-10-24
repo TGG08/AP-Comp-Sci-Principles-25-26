@@ -1,0 +1,30 @@
+setBotTitle("Raising the Roof")
+setBotSubtitle("By: The T")
+startBot()
+startRecording()
+func freakout (){
+    fabulize()
+    defabulize()
+    fabulize()
+}
+func raisetheroof() {
+    shakeItLeft()
+    shakeItRight()
+    shakeItCenter()
+    leftArmUp()
+    rightArmUp()
+    rightLegUp()
+    rightLegDown()
+    leftLegUp()
+    leftLegDown()
+}
+for i in 1...4 {
+    freakout()
+    freakout()
+    freakout()
+    raisetheroof()
+    freakout()
+    raisetheroof()
+    freakout()
+    raisetheroof()
+}
