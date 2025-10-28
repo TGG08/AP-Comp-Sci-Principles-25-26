@@ -1,0 +1,37 @@
+setBotTitle("Raising the Roof 2.0")
+setBotSubtitle("By: The T")
+startBot()
+startRecording()
+
+func freakout() {
+    fabulize()
+    defabulize()
+    fabulize()
+}
+
+func raisetheroof() {
+    shakeItLeft()
+    shakeItRight()
+    shakeItCenter()
+    leftArmUp()
+    rightArmUp()
+    rightLegUp()
+    rightLegDown()
+    leftLegUp()
+    leftLegDown()
+}
+
+func danceParty(rounds: Int) {
+    for i in 1...rounds {
+        if i % 2 == 0 {
+            speak("Round \(i)! Let's raise the roof!")
+            raisetheroof()
+        } else {
+            speak("Round \(i)! Time to freak out!")
+            freakout()
+        }
+    }
+}
+
+
+danceParty(rounds: 5)
