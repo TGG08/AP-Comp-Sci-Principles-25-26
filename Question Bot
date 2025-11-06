@@ -1,0 +1,22 @@
+func ResponsesTo(question: String) -> String {
+    let lowercaseQuestion = question.lowercased()
+
+    if lowercaseQuestion == "hello there" {
+        return "Hey! What's up?"
+    } else if lowercaseQuestion == "where should i go on holiday?" {
+     
+        return "Honestly, I'd go to Hawaii. I absolutely love the warm beaches."
+    } else if lowercaseQuestion == "where is the toilet paper?" {
+        return "Dude, check under the sink. It's always in there." 
+    } else if lowercaseQuestion.hasPrefix("can i have a water") {
+        return "Yeah, of course! No need to ask." 
+        
+    } else if lowercaseQuestion.hasPrefix("should i quit?") {
+        return "Nah, don't sweat it. Just keep going, you got this." 
+    } else {
+
+        return "Hmm. Lemme get back to you on that one."
+    }
+    
+}
+
