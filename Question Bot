@@ -1,42 +1,34 @@
 func responseTo(question: String) -> String {
     let lower = question.lowercased()
     
-    // Exact match
     if lower == "where are the cookies?" {
         return "In the chuck wagon!"
     }
     
-    // “Where” questions
     if lower.hasPrefix("where") {
         return "Out on the open range."
     }
     
-    // Greetings
     if lower.hasPrefix("hello") || lower.hasPrefix("hi") {
         return "Howdy!"
     }
     
-    // “Who” questions
     if lower.hasPrefix("who") {
         return "A real cowboy, that’s who."
     }
     
-    // “What” questions
     if lower.hasPrefix("what") {
         return "Just cowboy business."
     }
     
-    // “Why” questions
     if lower.hasPrefix("why") {
         return "Because the West is wild."
     }
     
-    // “How” questions
     if lower.hasPrefix("how") {
         return "With grit and a good horse."
     }
     
-    // Simple fallback
     let flip = question.count % 2
     if flip == 0 {
         return "Hard to say, partner."
