@@ -1,46 +1,46 @@
 func responseTo(question: String) -> String {
-    let lowercaseQuestion = question.lowercased()
-
-    if lowercaseQuestion == "hello there" {
-        return "Why, hello there!"
-    } else if lowercaseQuestion == "where should i go on holiday?" || lowercaseQuestion == "where can i find the north pole?" {
-        return "To the North!"
-    } else if lowercaseQuestion == "where are the cookies?" {
-        return "In the cookie jar!"
-    } else if lowercaseQuestion.hasPrefix("can i have a cookie?") {
-      
-        return "Yes, you may!"
-    } else if lowercaseQuestion.hasPrefix("should i quit?") {
-     
-        return "You should never quit!"
-    } else {
-      
-        return "Let me think about that one."
-    }
-}
-
-func responseTo(question: String) -> String {
-    //
-    let lowerQuestion = question.lowercased()
+    let lower = question.lowercased()
     
-    //
-    if lowerQuestion == "where are the cookies?" {
-        return "In the cookie jar!"
-    } else if lowerQuestion.hasPrefix("where") {
-        return "To the North!"
+    // Exact match
+    if lower == "where are the cookies?" {
+        return "In the chuck wagon!"
+    }
+    
+    // “Where” questions
+    if lower.hasPrefix("where") {
+        return "Out on the open range."
+    }
+    
+    // Greetings
+    if lower.hasPrefix("hello") || lower.hasPrefix("hi") {
+        return "Howdy!"
+    }
+    
+    // “Who” questions
+    if lower.hasPrefix("who") {
+        return "A real cowboy, that’s who."
+    }
+    
+    // “What” questions
+    if lower.hasPrefix("what") {
+        return "Just cowboy business."
+    }
+    
+    // “Why” questions
+    if lower.hasPrefix("why") {
+        return "Because the West is wild."
+    }
+    
+    // “How” questions
+    if lower.hasPrefix("how") {
+        return "With grit and a good horse."
+    }
+    
+    // Simple fallback
+    let flip = question.count % 2
+    if flip == 0 {
+        return "Hard to say, partner."
     } else {
-        if lowerQuestion.hasPrefix("Hello") {
-            return "why,hello there"
-        } else if lowerQuestion.hasPrefix("who") {
-            
-        }
-        let defaultNumber = question.count % 2
-        
-        if defaultNumber == 0 {
-            return "That really depends"
-        } else {
-            return "Ask me again tomorrow"
-        }
-
+        return "Try askin' again later."
     }
 }
