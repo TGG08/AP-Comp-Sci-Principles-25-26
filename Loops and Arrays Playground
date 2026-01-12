@@ -1,1 +1,7 @@
-
+//page 5
+let grades = ["A", "B", "C", "D", "E"] // String
+let starRatings = [1, 2, 3, 4, 5] // Int
+let someGrade = grades[0] // String
+let someRating = starRatings[0] // Int
+var anotherGrade = grades[1] // B 
+var anotherGrade = grades[3] // D
