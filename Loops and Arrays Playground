@@ -1,7 +1,41 @@
 //page 5
+//Option-click the two arrays below and look at their types
 let grades = ["A", "B", "C", "D", "E"] // String
 let starRatings = [1, 2, 3, 4, 5] // Int
+//What is the type of grades? What is the type of starRatings?
 let someGrade = grades[0] // String
 let someRating = starRatings[0] // Int
+Try setting anotherGrade to a number. What happens?
 var anotherGrade = grades[1] // B 
 var anotherGrade = grades[3] // D
+//page 13
+//Using what you’ve learned about making decisions, write an if statement that will only access the array if the value of index is less than the array's count. Uncomment and update the code below, then update the index constant to different numbers and see the results.
+let index = 3
+if index < devices.count {
+    devices[index]
+}
+
+// page 14
+// Create an empty array to hold song titles as strings, and use the append method to add three or four songs one at a time.
+var songList: [String] = []
+songList.append("Mascara")
+songList.append("Undone")
+songList.append("No Surpises")
+songList.append("Stone")
+//One enthusiastic singer wants to add three songs at once. Create an array holding this one singer's song list and use the += operator to append their whole list to the end of the group's song list.
+let enthusiasticSingerSongs = [
+    "Spins",
+    "Shake it off",
+    "Frontin"
+]
+songList += enthusiasticSingerSongs
+//Write a for…in loop and, for every song title in the array, print an encouraging announcement to let the next singer know that it's their turn.
+for song in songList {
+    print ("Now singing: /(song)! Get ready!)")
+}
+//After the loop has called everyone up to sing, use the removeAll method on the song list to clear out all the past songs.
+songList.removeAll()
+
+//page 15
+//Create two variables, one to count yes votes and one to count no votes. Each should start off with a value of zero.
+callout(Exercise): Create a for…in loop that iterates over one of the vote arrays and checks the value of each vote. If the vote is true, the loop should add one vote to the yes variable. If it's false, it should add one vote to the no variable.
