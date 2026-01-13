@@ -39,7 +39,67 @@ songList.removeAll()
 //page 15
 //Create two variables, one to count yes votes and one to count no votes. Each should start off with a value of zero.
 callout(Exercise): Create a for…in loop that iterates over one of the vote arrays and checks the value of each vote. If the vote is true, the loop should add one vote to the yes variable. If it's false, it should add one vote to the no variable.
+var yesshouldMascotChangeVotes = 0
+var noshouldMascotChangeVotes = 0
 
+for shouldMascotChangeVotes in shouldMascotChangeVotes {
+    if shouldMascotChangeVotes == true {
+        yesshouldMascotChangeVotes += 1
+    } else {
+        noshouldMascotChangeVotes += 1
+    }
+}
+
+var yesshouldInstallCoffeeVendingMachineVotes = 0
+var noshouldInstallCoffeeVendingMachineVotes = 0
+
+for shouldInstallCoffeeVendingMachineVotes in shouldInstallCoffeeVendingMachineVotes {
+    if shouldInstallCoffeeVendingMachineVotes == true {
+        yesshouldInstallCoffeeVendingMachineVotes += 1
+    } else {
+        noshouldInstallCoffeeVendingMachineVotes += 1
+    }
+}
+
+var yesshouldHaveMorePollOptionsVotes = 0
+var noshouldHaveMorePollOptionsVotes = 0
+
+for shouldHaveMorePollOptionsVotes in shouldHaveMorePollOptionsVotes {
+    if shouldHaveMorePollOptionsVotes == true {
+        yesshouldHaveMorePollOptionsVotes += 1
+    } else {
+        noshouldHaveMorePollOptionsVotes += 1
+    }
+}
 //After the loop has finished, write an if statement that compares the two values and prints a different message based on whether the vote passed or failed.
+if yesshouldMascotChangeVotes > noshouldMascotChangeVotes {
+    print ("The Vote passed")
+} else {
+    print ("The Vote failed")
+}
 
+if yesshouldHaveMorePollOptionsVotes > noshouldHaveMorePollOptionsVotes {
+    print ("The Vote passed")
+} else {
+    print ("The Vote failed")
+}
+
+if yesshouldInstallCoffeeVendingMachineVotes > noshouldInstallCoffeeVendingMachineVotes {
+    print ("The Vote passed")
+} else {
+    print ("The Vote failed")
+}
 //Write a function that takes two arguments: a string describing the issue being voted on and an array with the issue's Bool votes. Move the for…in loop and the if statement inside the function, so it prints the results when you call the function with a particular issue's arguments. You should be able to call the function like this:
+func printResults (forIssue issue: String, withVotes votes: [Bool]) {
+    var yesVotes = 0
+    var noVotes = 0
+    for vote in votes {
+        if vote {
+            yesVotes += 1
+        } else {
+            noVotes += 1
+        }
+    }
+    print ("\(issue) \(yesVotes) yes, \(noVotes) no")
+}
+printResults(forIssue: "Should we change the mascot?", withVotes: shouldMascotChangeVotes)
