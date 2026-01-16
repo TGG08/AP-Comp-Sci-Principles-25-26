@@ -103,3 +103,28 @@ func printResults (forIssue issue: String, withVotes votes: [Bool]) {
     print ("\(issue) \(yesVotes) yes, \(noVotes) no")
 }
 printResults(forIssue: "Should we change the mascot?", withVotes: shouldMascotChangeVotes)
+
+//page 16
+//Create an array literal with 20 to 25 items of sample data for your daily activity. It may be something like let milesBiked = [3, 7.5, 0, 0, 17 ... ] Feel free to make up or embellish the numbers, but make sure you have entries that are above, below and exactly at the goal you've thought of. Hint: Make sure to choose the right kind of array for your data, whether [Double] or [Int].
+let dailyExerciseMinutes: [Int] = [
+  30, 45, 60, 70, 55,
+  60, 80, 40, 25, 60,
+  90, 50, 60, 35, 65,
+  75, 20, 60, 85, 55
+]
+//Write a function that takes the daily number as an argument and returns a message as a string. It should return a different message based on how close the number comes to your goal. You can be as ambitious and creative as you'd like with your responses, but make sure to return at least two different messages depending on your daily progress!
+func exerciseFeedback(minutes: Int) -> String {
+    let goal = 60
+    if minutes == goal {
+        return "You hit your goal. Well done!"
+    } else if minutes > goal {
+        "Great job! You exceeded your goal!"
+    }
+    return "Keep going! You were below your goal today."
+
+}
+//Write a for…in loop that iterates over your sample data, calls your function to get an appropriate message for each item, and prints the message to the console.
+for minutes in dailyExerciseMinutes {
+    let message  = exerciseFeedback(minutes: minutes)
+    print (message)
+}
