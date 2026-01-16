@@ -128,3 +128,25 @@ for minutes in dailyExerciseMinutes {
     let message  = exerciseFeedback(minutes: minutes)
     print (message)
 }
+
+//page 17
+//Create a for…in loop to process the aliceMessages array by iterating through its legal indices. In the body of the loop, use the index to access a message from the array and check whether it contains the string "Caterpillar". If the message refers to the Caterpillar, print it to the console, along with its index.
+for i in aliceMessages.indices {
+    if aliceMessages[i].contains("Caterpillar") {
+        print("\(i): \(aliceMessages[i])")
+    }
+}
+
+//page 18
+//Write code below to iterate through the aliceMessages array until the first time you encounter a message for the given character. Then print out the index of that message and exit the loop. Don't print anything if the character isn't found. Use a Boolean variable to keep track of whether you've found a message and an index variable that you increment in the loop. Make sure to test your code with names that won't turn up any messages to account for potential bugs. (Your conditional will be a compound Boolean expression.)
+let characterName = "Alice"
+var index = 0
+var found = false
+while index < aliceMessages.count && !found {
+    if aliceMessages[index].contains(characterName) {
+        print(index)
+        found = true
+    }
+    index += 1
+}
+
