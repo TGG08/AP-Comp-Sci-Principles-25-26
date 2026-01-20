@@ -1,0 +1,22 @@
+//Using the struct syntax from this lesson, create a type for your real-world object with the properties and methods you thought of. Remembering to mark each property with let or var depending on whether or not it will be allowed to change. If you're not sure how to implement the body of one of the methods, describe what the method should do in a comment.
+// Add your own struct here:
+struct SmartLight {
+    let brand: String
+    var brightness: Int
+    var isOn: Bool
+    //toggle power
+    mutating func togglePower () {
+        isOn.toggle()
+        print("The light is now \(isOn ? "on" : "off:")")
+    }
+    //change brightness
+    mutating func dim(to level: Int) {
+        brightness = level
+        print ("Brightness set to \(brightness)%")
+
+    }
+}
+//Use the struct you created to make a new instance of your type.
+var livingRoomLight = SmartLight (brand: "Lumina", brightness: 80, isOn: true)
+livingRoomLight.dim (to: 40)
+livingRoomLight.togglePower()
