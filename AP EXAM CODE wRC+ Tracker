@@ -1,0 +1,1131 @@
+import SwiftUI
+
+enum PlayerTier: String, CaseIterable {
+    case aboveAverage = "Above Avg"
+    case average = "Average"
+    case belowAverage = "Below Avg"
+}
+
+struct LeagueConstants {
+    let leagueWOBA: Double
+    let wobaScale: Double
+    let walkWeight: Double
+    let hitByPitchWeight: Double
+    let singleWeight: Double
+    let doubleWeight: Double
+    let tripleWeight: Double
+    let homeRunWeight: Double
+    let leagueRunsPerPlateAppearance: Double
+
+    static let mlb2024 = LeagueConstants(
+        leagueWOBA: 0.310,
+        wobaScale: 1.242,
+        walkWeight: 0.689,
+        hitByPitchWeight: 0.720,
+        singleWeight: 0.882,
+        doubleWeight: 1.254,
+        tripleWeight: 1.590,
+        homeRunWeight: 2.050,
+        leagueRunsPerPlateAppearance: 0.117
+    )
+}
+
+struct HitterStats {
+    let plateAppearances: Int
+    let atBats: Int
+    let hits: Int
+    let doubles: Int
+    let triples: Int
+    let homeRuns: Int
+    let walks: Int
+    let intentionalWalks: Int
+    let hitByPitch: Int
+    let sacrificeFlies: Int
+
+    var singles: Int {
+        max(0, hits - doubles - triples - homeRuns)
+    }
+}
+
+struct Hitter: Identifiable {
+    let id = UUID()
+    let name: String
+    let team: String
+    let teamAbbreviation: String
+    let position: String
+    let parkFactor: Double
+    let stats: HitterStats
+
+    var weightedOnBaseAverage: Double {
+        let constants = LeagueConstants.mlb2024
+        let unintentionalWalks = stats.walks - stats.intentionalWalks
+        let denominator = Double(
+            stats.atBats +
+            stats.walks -
+            stats.intentionalWalks +
+            stats.sacrificeFlies +
+            stats.hitByPitch
+        )
+
+        let numerator =
+            constants.walkWeight * Double(unintentionalWalks) +
+            constants.hitByPitchWeight * Double(stats.hitByPitch) +
+            constants.singleWeight * Double(stats.singles) +
+            constants.doubleWeight * Double(stats.doubles) +
+            constants.tripleWeight * Double(stats.triples) +
+            constants.homeRunWeight * Double(stats.homeRuns)
+
+        guard denominator > 0 else {
+            return 0
+        }
+
+        return numerator / denominator
+    }
+
+    var weightedRunsAboveAverage: Double {
+        let constants = LeagueConstants.mlb2024
+        return ((weightedOnBaseAverage - constants.leagueWOBA) / constants.wobaScale) * Double(stats.plateAppearances)
+    }
+
+    var weightedRunsCreatedPlus: Int {
+        let constants = LeagueConstants.mlb2024
+        let plateAppearances = Double(stats.plateAppearances)
+
+        guard plateAppearances > 0 else {
+            return 0
+        }
+
+        let playerRunsPerPA = weightedRunsAboveAverage / plateAppearances
+        let parkAdjustment = constants.leagueRunsPerPlateAppearance - (parkFactor * constants.leagueRunsPerPlateAppearance)
+        let value = (((playerRunsPerPA + constants.leagueRunsPerPlateAppearance) + parkAdjustment) / constants.leagueRunsPerPlateAppearance) * 100
+        return Int(value.rounded())
+    }
+
+    var tier: PlayerTier {
+        if (95...105).contains(weightedRunsCreatedPlus) {
+            return .average
+        } else if weightedRunsCreatedPlus > 105 {
+            return .aboveAverage
+        } else {
+            return .belowAverage
+        }
+    }
+
+    var accentColor: Color {
+        tier.color
+    }
+
+    var formattedWOBA: String {
+        String(format: "%.3f", weightedOnBaseAverage)
+    }
+}
+
+struct ContentView: View {
+    @State private var customHitter: Hitter?
+    @State private var isShowingInputForm = false
+    @State private var searchText = ""
+    @State private var selectedComparisonIDs: [UUID] = []
+
+    private static let sampleHitters: [Hitter] = [
+        Hitter(
+            name: "Aaron Judge",
+            team: "New York Yankees",
+            teamAbbreviation: "NYY",
+            position: "OF",
+            parkFactor: 0.960,
+            stats: HitterStats(plateAppearances: 704, atBats: 559, hits: 180, doubles: 36, triples: 1, homeRuns: 58, walks: 133, intentionalWalks: 20, hitByPitch: 9, sacrificeFlies: 2)
+        ),
+        Hitter(
+            name: "Juan Soto",
+            team: "New York Yankees",
+            teamAbbreviation: "NYY",
+            position: "OF",
+            parkFactor: 0.960,
+            stats: HitterStats(plateAppearances: 712, atBats: 575, hits: 165, doubles: 30, triples: 4, homeRuns: 41, walks: 129, intentionalWalks: 2, hitByPitch: 4, sacrificeFlies: 4)
+        ),
+        Hitter(
+            name: "Shohei Ohtani",
+            team: "Los Angeles Dodgers",
+            teamAbbreviation: "LAD",
+            position: "DH",
+            parkFactor: 0.975,
+            stats: HitterStats(plateAppearances: 731, atBats: 636, hits: 197, doubles: 38, triples: 7, homeRuns: 54, walks: 81, intentionalWalks: 10, hitByPitch: 6, sacrificeFlies: 5)
+        ),
+        Hitter(
+            name: "Mookie Betts",
+            team: "Los Angeles Dodgers",
+            teamAbbreviation: "LAD",
+            position: "SS",
+            parkFactor: 0.975,
+            stats: HitterStats(plateAppearances: 516, atBats: 450, hits: 130, doubles: 24, triples: 5, homeRuns: 19, walks: 61, intentionalWalks: 2, hitByPitch: 5, sacrificeFlies: 4)
+        ),
+        Hitter(
+            name: "Bobby Witt Jr.",
+            team: "Kansas City Royals",
+            teamAbbreviation: "KC",
+            position: "SS",
+            parkFactor: 1.064,
+            stats: HitterStats(plateAppearances: 709, atBats: 636, hits: 211, doubles: 45, triples: 11, homeRuns: 32, walks: 57, intentionalWalks: 9, hitByPitch: 8, sacrificeFlies: 8)
+        ),
+        Hitter(
+            name: "Bryce Harper",
+            team: "Philadelphia Phillies",
+            teamAbbreviation: "PHI",
+            position: "1B",
+            parkFactor: 1.039,
+            stats: HitterStats(plateAppearances: 631, atBats: 550, hits: 157, doubles: 42, triples: 0, homeRuns: 30, walks: 76, intentionalWalks: 11, hitByPitch: 2, sacrificeFlies: 2)
+        ),
+        Hitter(
+            name: "Nico Hoerner",
+            team: "Chicago Cubs",
+            teamAbbreviation: "CHC",
+            position: "2B",
+            parkFactor: 1.000,
+            stats: HitterStats(plateAppearances: 641, atBats: 582, hits: 159, doubles: 35, triples: 1, homeRuns: 7, walks: 44, intentionalWalks: 1, hitByPitch: 12, sacrificeFlies: 3)
+        ),
+        Hitter(
+            name: "Dansby Swanson",
+            team: "Chicago Cubs",
+            teamAbbreviation: "CHC",
+            position: "SS",
+            parkFactor: 1.000,
+            stats: HitterStats(plateAppearances: 593, atBats: 534, hits: 129, doubles: 27, triples: 2, homeRuns: 16, walks: 54, intentionalWalks: 2, hitByPitch: 2, sacrificeFlies: 3)
+        ),
+        Hitter(
+            name: "Brice Turang",
+            team: "Milwaukee Brewers",
+            teamAbbreviation: "MIL",
+            position: "2B",
+            parkFactor: 0.950,
+            stats: HitterStats(plateAppearances: 619, atBats: 559, hits: 142, doubles: 24, triples: 4, homeRuns: 7, walks: 50, intentionalWalks: 1, hitByPitch: 2, sacrificeFlies: 3)
+        ),
+        Hitter(
+            name: "Javier Baez",
+            team: "Detroit Tigers",
+            teamAbbreviation: "DET",
+            position: "SS",
+            parkFactor: 1.010,
+            stats: HitterStats(plateAppearances: 289, atBats: 272, hits: 50, doubles: 12, triples: 0, homeRuns: 6, walks: 12, intentionalWalks: 1, hitByPitch: 2, sacrificeFlies: 3)
+        )
+    ]
+
+    private var hitters: [Hitter] {
+        if let customHitter {
+            return [customHitter] + Self.sampleHitters
+        }
+
+        return Self.sampleHitters
+    }
+
+    private var comparisonSearchResults: [Hitter] {
+        pullUpPlayersToCompare(matching: searchText)
+    }
+
+    private var comparedHitters: [Hitter] {
+        hitters.filter { selectedComparisonIDs.contains($0.id) }
+    }
+
+    private var tierBreakdown: [PlayerTier: Int] {
+        Dictionary(grouping: hitters, by: \.tier).mapValues(\.count)
+    }
+
+    private var groupAverageWRCPlus: Double {
+        guard hitters.isEmpty == false else {
+            return 0
+        }
+
+        let total = hitters.reduce(0) { $0 + $1.weightedRunsCreatedPlus }
+        return Double(total) / Double(hitters.count)
+    }
+
+    var body: some View {
+        NavigationStack {
+            AppBackground {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        headerCard
+                        searchCard
+                        tierChartCard
+
+                        if comparedHitters.isEmpty == false {
+                            comparisonCard
+                        } else {
+                            emptyComparisonCard
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 20)
+                }
+            }
+            .navigationTitle("MLB Hitters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        AllPlayersView(
+                            hitters: hitters,
+                            groupAverageWRCPlus: groupAverageWRCPlus,
+                            selectedComparisonIDs: $selectedComparisonIDs
+                        )
+                    } label: {
+                        Text("All Players")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .tint(.white)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isShowingInputForm = true
+                    } label: {
+                        Label("Add Hitter", systemImage: "plus.circle.fill")
+                            .labelStyle(.titleAndIcon)
+                    }
+                    .tint(.white)
+                }
+            }
+            .sheet(isPresented: $isShowingInputForm) {
+                AddHitterView { hitter in
+                    customHitter = hitter
+                }
+            }
+        }
+    }
+
+    private var headerCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("wRC+ Tracker")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            Text("wRC+ stands for Weighted Runs Created Plus. It estimates a hitter's total offensive value by combining how often they get on base, how much power they produce, and how that production compares to league scoring conditions.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.78))
+
+            Text("A score of 100 is league average. Numbers above 100 mean a player creates runs better than average, while numbers below 100 mean less offensive value. That makes wRC+ one of the clearest ways to compare hitters across teams, ballparks, and scoring environments.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.78))
+
+            HStack(spacing: 10) {
+                HeaderChip(title: "Season", value: "MLB 2024")
+                HeaderChip(title: "League Avg", value: "wRC+ 100")
+                HeaderChip(title: "Constants", value: "FanGraphs")
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(.highlight)
+    }
+
+    private var searchCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Pull Up Players To Compare")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+
+            Text("Type a player name to pull up matches and add them directly to the comparison chart. The full directory stays available on the All Players page.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.74))
+
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.white.opacity(0.65))
+
+                TextField("Type a hitter name", text: $searchText)
+                    .textInputAutocapitalization(.words)
+                    .foregroundStyle(.white)
+
+                if searchText.isEmpty == false {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.white.opacity(0.08))
+            )
+
+            if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+                if comparisonSearchResults.isEmpty {
+                    Text("No hitters matched that search.")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.70))
+                } else {
+                    VStack(spacing: 10) {
+                        ForEach(comparisonSearchResults.prefix(5)) { hitter in
+                            CompareSearchRow(
+                                hitter: hitter,
+                                isSelected: selectedComparisonIDs.contains(hitter.id),
+                                onTap: {
+                                    toggleComparison(for: hitter)
+                                    searchText = ""
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard()
+    }
+
+    private var tierChartCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Group Snapshot")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+
+            Text("This chart groups the selected hitters by wRC+ relative to league average. Tap any card for the full breakdown or add your own hitter to compare.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.74))
+
+            HStack(spacing: 10) {
+                ForEach(PlayerTier.allCases, id: \.self) { tier in
+                    let count = tierBreakdown[tier, default: 0]
+                    TierCountCard(
+                        title: tier.rawValue,
+                        count: count,
+                        color: tier.color
+                    )
+                }
+            }
+
+            GeometryReader { geometry in
+                let total = max(hitters.count, 1)
+
+                HStack(spacing: 8) {
+                    ForEach(PlayerTier.allCases, id: \.self) { tier in
+                        let count = tierBreakdown[tier, default: 0]
+                        let width = (geometry.size.width - 16) * (CGFloat(count) / CGFloat(total))
+
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(tier.color)
+                            .frame(width: max(width, count == 0 ? 0 : 18), height: 18)
+                            .overlay(alignment: .center) {
+                                if count > 0 {
+                                    Text("\(count)")
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                    }
+                }
+            }
+            .frame(height: 18)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard()
+    }
+
+    private var comparisonCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Selected Comparison")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+
+                Spacer()
+
+                Button("Clear") {
+                    selectedComparisonIDs.removeAll()
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.78))
+            }
+
+            ForEach(comparedHitters) { hitter in
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(hitter.name)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                        Text("\(hitter.teamAbbreviation) • \(hitter.position)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.70))
+                    }
+
+                    Spacer()
+
+                    ComparisonMetric(label: "wRC+", value: "\(hitter.weightedRunsCreatedPlus)")
+                    ComparisonMetric(label: "wOBA", value: String(format: "%.3f", hitter.weightedOnBaseAverage))
+                    ComparisonMetric(label: "HR", value: "\(hitter.stats.homeRuns)")
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(.white.opacity(0.06))
+                )
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard()
+    }
+
+    private var emptyComparisonCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("No Players Selected")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+
+            Text("Use the compare search above to add hitters to the comparison chart, or open All Players to browse the full list.")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.74))
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard()
+    }
+
+    private func pullUpPlayersToCompare(matching query: String) -> [Hitter] {
+        guard query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
+            return []
+        }
+
+        return hitters.filter { hitter in
+            hitter.name.localizedCaseInsensitiveContains(query) ||
+            hitter.team.localizedCaseInsensitiveContains(query) ||
+            hitter.teamAbbreviation.localizedCaseInsensitiveContains(query) ||
+            hitter.position.localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    private func toggleComparison(for hitter: Hitter) {
+        if let index = selectedComparisonIDs.firstIndex(of: hitter.id) {
+            selectedComparisonIDs.remove(at: index)
+            return
+        }
+
+        selectedComparisonIDs.append(hitter.id)
+    }
+
+}
+
+struct HitterCard: View {
+    let hitter: Hitter
+    let groupAverageWRCPlus: Double
+    let groupHitters: [Hitter]
+    let isSelectedForComparison: Bool
+    let onCompareTap: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(hitter.name)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.white)
+
+                    Text("\(hitter.team) • \(hitter.position)")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+
+                Spacer()
+
+                VStack(spacing: 6) {
+                    Text(hitter.teamAbbreviation)
+                        .font(.headline.weight(.heavy))
+                        .foregroundStyle(.white)
+                    Text("wRC+")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.70))
+                    Text("\(hitter.weightedRunsCreatedPlus)")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(hitter.accentColor)
+                }
+                .frame(width: 68, height: 78)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.08))
+                )
+            }
+
+            HStack {
+                Text(isSelectedForComparison ? "Selected for comparison" : "Tap compare to add")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.72))
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    Button {
+                        onCompareTap()
+                    } label: {
+                        Text(isSelectedForComparison ? "Remove" : "Compare")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(isSelectedForComparison ? Color.dangerRed : Color.successGreen)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        HitterDetailView(
+                            hitter: hitter,
+                            groupAverageWRCPlus: groupAverageWRCPlus,
+                            groupHitters: groupHitters
+                        )
+                    } label: {
+                        Text("Details")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(.white.opacity(0.10))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                StatTile(label: "PA", value: hitter.stats.plateAppearances)
+                StatTile(label: "AB", value: hitter.stats.atBats)
+                StatTile(label: "H", value: hitter.stats.hits)
+                StatTile(label: "1B", value: hitter.stats.singles)
+                StatTile(label: "2B", value: hitter.stats.doubles)
+                StatTile(label: "3B", value: hitter.stats.triples)
+                StatTile(label: "HR", value: hitter.stats.homeRuns)
+                StatTile(label: "BB", value: hitter.stats.walks)
+                StatTile(label: "IBB", value: hitter.stats.intentionalWalks)
+                StatTile(label: "HBP", value: hitter.stats.hitByPitch)
+                StatTile(label: "SF", value: hitter.stats.sacrificeFlies)
+            }
+        }
+        .padding(18)
+        .appCard(.player)
+    }
+}
+
+struct AllPlayersView: View {
+    let hitters: [Hitter]
+    let groupAverageWRCPlus: Double
+    @Binding var selectedComparisonIDs: [UUID]
+
+    var body: some View {
+        AppBackground {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Every hitter in the sample is available here, even when the home screen is focused only on comparison.")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.76))
+
+                    ForEach(hitters) { hitter in
+                        HitterCard(
+                            hitter: hitter,
+                            groupAverageWRCPlus: groupAverageWRCPlus,
+                            groupHitters: hitters,
+                            isSelectedForComparison: selectedComparisonIDs.contains(hitter.id),
+                            onCompareTap: {
+                                toggleComparison(for: hitter)
+                            }
+                        )
+                    }
+                }
+                .padding(16)
+            }
+        }
+        .navigationTitle("All Players")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func toggleComparison(for hitter: Hitter) {
+        if let index = selectedComparisonIDs.firstIndex(of: hitter.id) {
+            selectedComparisonIDs.remove(at: index)
+            return
+        }
+
+        selectedComparisonIDs.append(hitter.id)
+    }
+}
+
+struct HitterDetailView: View {
+    let hitter: Hitter
+    let groupAverageWRCPlus: Double
+    let groupHitters: [Hitter]
+
+    private var rank: Int {
+        let sortedHitters = groupHitters.sorted { $0.weightedRunsCreatedPlus > $1.weightedRunsCreatedPlus }
+        return (sortedHitters.firstIndex { $0.id == hitter.id } ?? 0) + 1
+    }
+
+    private var deltaFromGroupAverage: Int {
+        hitter.weightedRunsCreatedPlus - Int(groupAverageWRCPlus.rounded())
+    }
+
+    var body: some View {
+        AppBackground {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    detailHeader
+                    comparisonCard
+                    inputsCard
+                }
+                .padding(16)
+            }
+        }
+        .navigationTitle(hitter.name)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var detailHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(hitter.teamAbbreviation)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.70))
+
+            Text("\(hitter.name) • \(hitter.position)")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 10) {
+                HeaderChip(title: "wRC+", value: "\(hitter.weightedRunsCreatedPlus)")
+                HeaderChip(title: "wOBA", value: hitter.formattedWOBA)
+                HeaderChip(title: "Rank", value: "#\(rank)")
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(.player)
+    }
+
+    private var comparisonCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Comparison")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 12) {
+                ComparisonTile(
+                    title: "Group Avg",
+                    value: "\(Int(groupAverageWRCPlus.rounded()))",
+                    accent: .warningGold
+                )
+                ComparisonTile(
+                    title: "Difference",
+                    value: deltaFromGroupAverage >= 0 ? "+\(deltaFromGroupAverage)" : "\(deltaFromGroupAverage)",
+                    accent: deltaFromGroupAverage >= 0 ? .successGreen : .dangerRed
+                )
+                ComparisonTile(
+                    title: "Tier",
+                    value: hitter.tier.rawValue,
+                    accent: hitter.accentColor
+                )
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(.player)
+    }
+
+    private var inputsCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Inputs Used")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                StatTile(label: "PA", value: hitter.stats.plateAppearances)
+                StatTile(label: "AB", value: hitter.stats.atBats)
+                StatTile(label: "H", value: hitter.stats.hits)
+                StatTile(label: "1B", value: hitter.stats.singles)
+                StatTile(label: "2B", value: hitter.stats.doubles)
+                StatTile(label: "3B", value: hitter.stats.triples)
+                StatTile(label: "HR", value: hitter.stats.homeRuns)
+                StatTile(label: "BB", value: hitter.stats.walks)
+                StatTile(label: "IBB", value: hitter.stats.intentionalWalks)
+                StatTile(label: "HBP", value: hitter.stats.hitByPitch)
+                StatTile(label: "SF", value: hitter.stats.sacrificeFlies)
+                DoubleStatTile(label: "PF", value: hitter.parkFactor)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(.player)
+    }
+}
+
+struct AddHitterView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name = ""
+    @State private var team = ""
+    @State private var teamAbbreviation = ""
+    @State private var position = ""
+    @State private var parkFactor = "1.000"
+    @State private var plateAppearances = ""
+    @State private var atBats = ""
+    @State private var hits = ""
+    @State private var doubles = ""
+    @State private var triples = ""
+    @State private var homeRuns = ""
+    @State private var walks = ""
+    @State private var intentionalWalks = ""
+    @State private var hitByPitch = ""
+    @State private var sacrificeFlies = ""
+
+    let onSave: (Hitter) -> Void
+
+    private var canSave: Bool {
+        name.isEmpty == false &&
+        team.isEmpty == false &&
+        teamAbbreviation.isEmpty == false &&
+        position.isEmpty == false &&
+        intValue(for: plateAppearances) > 0
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Player") {
+                    TextField("Name", text: $name)
+                    TextField("Team", text: $team)
+                    TextField("Team Abbreviation", text: $teamAbbreviation)
+                    TextField("Position", text: $position)
+                    TextField("Park Factor", text: $parkFactor)
+                        .keyboardType(.decimalPad)
+                }
+
+                Section("Batting Inputs") {
+                    statField("Plate Appearances", text: $plateAppearances)
+                    statField("At Bats", text: $atBats)
+                    statField("Hits", text: $hits)
+                    statField("Doubles", text: $doubles)
+                    statField("Triples", text: $triples)
+                    statField("Home Runs", text: $homeRuns)
+                    statField("Walks", text: $walks)
+                    statField("Intentional Walks", text: $intentionalWalks)
+                    statField("Hit By Pitch", text: $hitByPitch)
+                    statField("Sacrifice Flies", text: $sacrificeFlies)
+                }
+            }
+            .navigationTitle("Add Hitter")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(makeHitter())
+                        dismiss()
+                    }
+                    .disabled(canSave == false)
+                }
+            }
+        }
+    }
+
+    private func statField(_ title: String, text: Binding<String>) -> some View {
+        TextField(title, text: text)
+            .keyboardType(.numberPad)
+    }
+
+    private func intValue(for string: String) -> Int {
+        Int(string) ?? 0
+    }
+
+    private func doubleValue(for string: String, fallback: Double) -> Double {
+        Double(string) ?? fallback
+    }
+
+    private func makeHitter() -> Hitter {
+        Hitter(
+            name: name,
+            team: team,
+            teamAbbreviation: teamAbbreviation.uppercased(),
+            position: position.uppercased(),
+            parkFactor: doubleValue(for: parkFactor, fallback: 1.000),
+            stats: HitterStats(
+                plateAppearances: intValue(for: plateAppearances),
+                atBats: intValue(for: atBats),
+                hits: intValue(for: hits),
+                doubles: intValue(for: doubles),
+                triples: intValue(for: triples),
+                homeRuns: intValue(for: homeRuns),
+                walks: intValue(for: walks),
+                intentionalWalks: intValue(for: intentionalWalks),
+                hitByPitch: intValue(for: hitByPitch),
+                sacrificeFlies: intValue(for: sacrificeFlies)
+            )
+        )
+    }
+}
+
+struct HeaderChip: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title.uppercased())
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.62))
+
+            Text(value)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color(red: 0.98, green: 0.28, blue: 0.20).opacity(0.18))
+        )
+    }
+}
+
+struct StatTile: View {
+    let label: String
+    let value: Int
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(label)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.68))
+            Text("\(value)")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white.opacity(0.07))
+        )
+    }
+}
+
+struct TierCountCard: View {
+    let title: String
+    let count: Int
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Circle()
+                .fill(color)
+                .frame(width: 10, height: 10)
+
+            Text("\(count)")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(.white)
+
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.70))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.white.opacity(0.06))
+        )
+    }
+}
+
+struct ComparisonTile: View {
+    let title: String
+    let value: String
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.70))
+
+            Text(value)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+
+            Capsule(style: .continuous)
+                .fill(accent)
+                .frame(width: 28, height: 6)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.white.opacity(0.06))
+        )
+    }
+}
+
+struct DoubleStatTile: View {
+    let label: String
+    let value: Double
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(label)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.68))
+            Text(String(format: "%.3f", value))
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white.opacity(0.07))
+        )
+    }
+}
+
+struct ComparisonMetric: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(label)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.65))
+            Text(value)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white)
+        }
+        .frame(minWidth: 48)
+    }
+}
+
+struct CompareSearchRow: View {
+    let hitter: Hitter
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(hitter.name)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+                Text("\(hitter.teamAbbreviation) • \(hitter.position) • wRC+ \(hitter.weightedRunsCreatedPlus)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.72))
+            }
+
+            Spacer()
+
+            Button {
+                onTap()
+            } label: {
+                Text(isSelected ? "Remove" : "Add")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(isSelected ? Color.dangerRed : Color.successGreen)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white.opacity(0.06))
+        )
+    }
+}
+
+extension PlayerTier {
+    var color: Color {
+        switch self {
+        case .aboveAverage:
+            return .successGreen
+        case .average:
+            return .warningGold
+        case .belowAverage:
+            return .dangerRed
+        }
+    }
+}
+
+extension Color {
+    static let successGreen = Color(red: 0.11, green: 0.74, blue: 0.45)
+    static let warningGold = Color(red: 0.96, green: 0.74, blue: 0.17)
+    static let dangerRed = Color(red: 0.98, green: 0.28, blue: 0.20)
+    static let appNavy = Color(red: 0.03, green: 0.09, blue: 0.20)
+    static let appBlue = Color(red: 0.06, green: 0.15, blue: 0.32)
+    static let appInk = Color(red: 0.02, green: 0.05, blue: 0.12)
+    static let panelFill = Color(red: 0.07, green: 0.12, blue: 0.24).opacity(0.94)
+    static let playerFill = Color(red: 0.05, green: 0.10, blue: 0.20).opacity(0.92)
+}
+
+enum AppCardStyle {
+    case highlight
+    case panel
+    case player
+
+    var fill: Color {
+        switch self {
+        case .highlight:
+            return .white.opacity(0.10)
+        case .panel:
+            return .panelFill
+        case .player:
+            return .playerFill
+        }
+    }
+
+    var strokeOpacity: Double {
+        self == .highlight ? 0.12 : 0.10
+    }
+}
+
+struct AppBackground<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [.appNavy, .appBlue, .appInk],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            content
+        }
+    }
+}
+
+extension View {
+    func appCard(_ style: AppCardStyle = .panel) -> some View {
+        background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(style.fill)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(.white.opacity(style.strokeOpacity), lineWidth: 1)
+                )
+        )
+    }
+}
+
+#Preview {
+    ContentView()
+}
